@@ -18,18 +18,18 @@ export default {
     imageUrl: String,
     imageHeight: Number,
     imageWidth: Number,
-    width:{
-      type:Number,
-      default:()=>{
-        return 800
-      }
+    width: {
+      type: Number,
+      default: () => {
+        return 800;
+      },
     },
-        height:{
-      type:Number,
-      default:()=>{
-        return 600
-      }
-    }
+    height: {
+      type: Number,
+      default: () => {
+        return 600;
+      },
+    },
   },
   data() {
     return {
@@ -39,23 +39,22 @@ export default {
       polyNodeStack: [],
       currentPolyPath: null,
       currentPolyNode: null,
-      labelImage:null
     };
   },
   watch: {
     mode() {
+      this.canvas.css({
+        cursor: this.mode !== "drag" ? "pointer" : "default",
+      });
+      this.canvas.find("#drawLayer").remove();
       if (this.mode !== "drag") {
-        this.canvas.css({
-          cursor: "pointer",
-        });
-      } else {
-        this.canvas.css({
-          cursor: "default",
-        });
+        this.canvas.createDrawLayer(this.mode);
       }
     },
     imageUrl() {
+      this.$emit("update:mode", "drag");
       this.view.zoom(1);
+      this.view.zoomNum = 1;
       this.view.viewbox(0, 0, this.width, this.height);
       this.canvas.children().forEach((child) => {
         child.remove();
@@ -71,27 +70,34 @@ export default {
       .size(this.width, this.height)
       .viewbox(0, 0, this.width, this.height)
       .panZoom(this.zoomConfig);
+    this.view.zoomNum = 1;
     this.view.on("zoom", (lvl) => {
+      this.view.zoomNum = lvl.detail.level;
       this.$emit("update:zoom", lvl.detail.level);
     });
-    this.canvas = this.view.group().attr({ id: "canvas" });
-    enhanceCanvas(this.canvas);
+    this.canvas = this.view.group().attr({ id: "canvas" })
+    this.canvas.on('click',function(){
+      console.log('canvas-click')
+      this.clearSelect()
+    })
+    enhanceCanvas(this.canvas, this);
   },
   methods: {
+    clearSelect() {
+      this.canvas.clearSelect();
+    },
     initCanvas: async function (imageUrl) {
       const image = await loadImage(imageUrl);
       const { width, height } = image;
       const ratio = height / width;
-      const expectWidth = this.width*0.75;
+      const expectWidth = this.width * 0.75;
       this.$emit("update:imageWidth", width);
       this.$emit("update:imageHeight", height);
       this.$emit("update:ratio", ratio);
       this.$emit("update:bitScale", width / expectWidth);
-      this.labelImage = this.canvas
-        .loadImage(imageUrl)
-        .size(expectWidth, expectWidth * ratio);
-    }
-  }
+      this.canvas.loadImage(imageUrl).size(expectWidth, expectWidth * ratio);
+    },
+  },
 };
 </script>
 
