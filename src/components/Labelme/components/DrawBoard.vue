@@ -5,16 +5,6 @@
   </div>
 </template>
 <script>
-import {
-  createSelectedRectMask,
-  createRect,
-  getRectClickPosition,
-} from "../utils/rect";
-import {
-  createSelectedPolyMask,
-  currentNodeMovePosition,
-  countCloseNodeShow,
-} from "../utils/polygon";
 import { loadImage, enhanceCanvas } from "../utils/init";
 export default {
   name: "Board",
@@ -49,6 +39,7 @@ export default {
       polyNodeStack: [],
       currentPolyPath: null,
       currentPolyNode: null,
+      labelImage:null
     };
   },
   watch: {
@@ -62,7 +53,6 @@ export default {
           cursor: "default",
         });
       }
-      this.polyInit();
     },
     imageUrl() {
       this.view.zoom(1);
@@ -97,178 +87,11 @@ export default {
       this.$emit("update:imageHeight", height);
       this.$emit("update:ratio", ratio);
       this.$emit("update:bitScale", width / expectWidth);
-      const background = this.canvas
+      this.labelImage = this.canvas
         .loadImage(imageUrl)
         .size(expectWidth, expectWidth * ratio);
-      background.on("click", this.backgroundClickHandler);
-      background.on("mousemove", this.polyBackgroundMousemoveHandler);
-    },
-    attachPolyNodeClick(e) {
-      return this.canvas
-        .circle()
-        .radius(6)
-        .attr(
-          Object.assign(
-            {
-              fill: "blue",
-              "fill-opacity": 0.4,
-              class: "node",
-            },
-            currentNodeMovePosition(e, this.zoom)
-          )
-        )
-        .css({
-          cursor: "pointer",
-        })
-        .on("click", (e) => {
-          if (this.currentPolyNode.attr("id") === "startnode") {
-            const closeCircle = this.canvas
-              .circle()
-              .radius(15)
-              .attr({
-                cx: this.currentPolyNode.attr("cx"),
-                cy: this.currentPolyNode.attr("cy"),
-                fill: "blue",
-                "fill-opacity": 0.2,
-                id: "close",
-                class: "node",
-              })
-              .hide();
-            closeCircle.on("click", () => {
-              const pathDataStr =
-                this.currentPolyPath.array().join().replaceAll(",", " ") +
-                `L ${closeCircle.attr("cx")} ${closeCircle.attr("cy")}z`;
-              const poly = this.currentPolyPath
-                .plot(pathDataStr)
-                .toPoly()
-                .attr({
-                  stroke: "none",
-                  fill: "white",
-                  "fill-opacity": 0.5,
-                  id: "poly" + this.count++,
-                  type: "polygon",
-                  name: "untitled",
-                })
-                .on("click", () => {
-                  this.select(poly, "poly");
-                });
-              this.$emit(
-                "update:graphObjectList",
-                this.graphObjectList.concat([poly])
-              );
-              this.$emit("update:mode", "drag");
-              this.canvas.find("circle").forEach((circle) => circle.remove());
-              this.select(poly, "poly");
-            });
-          }
-          this.polyNodeStack.push(this.currentPolyNode);
-          this.currentPolyNode = this.attachPolyNodeClick(e);
-          const lastPolyNode =
-            this.polyNodeStack[this.polyNodeStack.length - 1];
-          if (this.polyNodeStack.length === 1) {
-            this.currentPolyPath = this.canvas
-              .path()
-              .plot(`M ${lastPolyNode.attr("cx")} ${lastPolyNode.attr("cy")}`)
-              .attr({
-                fill: "none",
-                stroke: "blue",
-                "stroke-opacity": 0.4,
-                "stroke-width": 3,
-              });
-          } else if (this.polyNodeStack.length > 1) {
-            const pathDataStr =
-              this.currentPolyPath.array().join().replaceAll(",", " ") +
-              `L ${lastPolyNode.attr("cx")} ${lastPolyNode.attr("cy")}`;
-            this.currentPolyPath.plot(pathDataStr);
-          } else {
-            return;
-          }
-        })
-        .on("mousemove", this.polyNodeMousemoveHandler);
-    },
-    polyNodeMousemoveHandler(e) {
-      this.currentPolyNode.attr(currentNodeMovePosition(e, this.zoom));
-      if (this.polyNodeStack.length > 2) {
-        const close = this.canvas.find("#close")[0];
-        countCloseNodeShow(this.currentPolyNode, close);
-      }
-    },
-    polyBackgroundMousemoveHandler(e) {
-      if (this.mode === "poly") {
-        if (this.currentPolyNode === null) {
-          this.currentPolyNode = this.attachPolyNodeClick(e).attr({
-            id: "startnode",
-          });
-        } else {
-          this.polyNodeMousemoveHandler(e);
-        }
-      }
-      return;
-    },
-    select(target, targetShape) {
-      this.clearSelect();
-      if (targetShape === "rect") {
-        createSelectedRectMask(this.canvas, target);
-      } else if (targetShape === "poly") {
-        createSelectedPolyMask(this.canvas, target);
-      }
-    },
-    backgroundClickHandler(e) {
-      if (this.mode !== "poly") {
-        if (this.mode === "drag") {
-          this.clearSelect();
-        } else if (this.mode === "rect") {
-          const rect = createRect(
-            this.canvas,
-            this.ratio,
-            Object.assign(
-              {
-                fill: "white",
-                "fill-opacity": 0.5,
-                id: "rect" + this.count++,
-                name: "untitled",
-                type: "rectangle",
-              },
-              getRectClickPosition(this.zoom, e)
-            ),
-            () => {
-              this.select(rect, "rect");
-            }
-          );
-          this.select(rect, "rect");
-          this.$emit("update:mode", "drag");
-          this.$emit(
-            "update:graphObjectList",
-            this.graphObjectList.concat([rect])
-          );
-        }
-      }
-    },
-    clearSelect() {
-      const select = document.getElementById("select");
-      if (select !== null) {
-        document
-          .getElementById("canvas")
-          .removeChild(document.getElementById("select"));
-      }
-    },
-    clearAll() {
-      this.canvas.children().forEach((child) => {
-        if (child.attr("id") !== "background") {
-          child.remove();
-        }
-      });
-      this.polyInit();
-      this.$emit("update:graphObjectList", []);
-    },
-    polyInit() {
-      this.polyNodeStack = [];
-      this.currentPolyPath = null;
-      this.currentPolyNode = null;
-      this.canvas.find(".node").forEach((circle) => circle.remove());
-      this.canvas.find("path").forEach((path) => path.remove());
-    },
-  },
+    }
+  }
 };
 </script>
 

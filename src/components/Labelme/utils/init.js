@@ -13,8 +13,4 @@ export const enhanceCanvas =(canvas)=>{
         return this.image(imageUrl)
         .attr({ id: "background" })
     }
-    canvas['changeMode']=function(mode){
-        this.mode = mode
-        return this
-    }
 }
