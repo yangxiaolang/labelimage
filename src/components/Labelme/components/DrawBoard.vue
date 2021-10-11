@@ -15,7 +15,7 @@ import {
   currentNodeMovePosition,
   countCloseNodeShow,
 } from "../utils/polygon";
-import { loadImage,enhanceCanvas } from "../utils/init";
+import { loadImage, enhanceCanvas } from "../utils/init";
 export default {
   name: "Board",
   props: {
@@ -28,6 +28,18 @@ export default {
     imageUrl: String,
     imageHeight: Number,
     imageWidth: Number,
+    width:{
+      type:Number,
+      default:()=>{
+        return 800
+      }
+    },
+        height:{
+      type:Number,
+      default:()=>{
+        return 600
+      }
+    }
   },
   data() {
     return {
@@ -54,7 +66,7 @@ export default {
     },
     imageUrl() {
       this.view.zoom(1);
-      this.view.viewbox(0, 0, 800, 600);
+      this.view.viewbox(0, 0, this.width, this.height);
       this.canvas.children().forEach((child) => {
         child.remove();
       });
@@ -66,26 +78,28 @@ export default {
   mounted() {
     this.view = this.$svg()
       .addTo("#board")
-      .size(800, 600)
-      .viewbox(0, 0, 800, 600)
+      .size(this.width, this.height)
+      .viewbox(0, 0, this.width, this.height)
       .panZoom(this.zoomConfig);
     this.view.on("zoom", (lvl) => {
       this.$emit("update:zoom", lvl.detail.level);
     });
     this.canvas = this.view.group().attr({ id: "canvas" });
-    enhanceCanvas(this.canvas)
+    enhanceCanvas(this.canvas);
   },
   methods: {
     initCanvas: async function (imageUrl) {
       const image = await loadImage(imageUrl);
-      const {width,height} = image
+      const { width, height } = image;
       const ratio = height / width;
-      const expectWidth = 600
+      const expectWidth = this.width*0.75;
       this.$emit("update:imageWidth", width);
       this.$emit("update:imageHeight", height);
       this.$emit("update:ratio", ratio);
       this.$emit("update:bitScale", width / expectWidth);
-      const background = this.canvas.background(imageUrl).size(expectWidth, expectWidth * ratio);
+      const background = this.canvas
+        .loadImage(imageUrl)
+        .size(expectWidth, expectWidth * ratio);
       background.on("click", this.backgroundClickHandler);
       background.on("mousemove", this.polyBackgroundMousemoveHandler);
     },

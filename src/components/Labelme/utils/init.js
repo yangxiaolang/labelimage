@@ -9,7 +9,7 @@ export const loadImage = (url)=>{
 }
 
 export const enhanceCanvas =(canvas)=>{
-    canvas['background']=function(imageUrl){
+    canvas.loadImage=function(imageUrl){
         return this.image(imageUrl)
         .attr({ id: "background" })
     }
