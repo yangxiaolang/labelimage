@@ -1,5 +1,6 @@
 <template>
   <div id="board"
+       oncontextmenu="return false;"
        class="board"
        style="background:rgb(244,244,244)">
   </div>
@@ -48,7 +49,10 @@ export default {
       });
       this.canvas.find("#drawLayer").remove();
       if (this.mode !== "drag") {
+        this.canvas.on("contextmenu", this.canvas.drawCancel);
         this.canvas.createDrawLayer(this.mode);
+      } else {
+        this.canvas.off("contextmenu");
       }
     },
     imageUrl() {
@@ -73,6 +77,24 @@ export default {
     this.view.zoomNum = 1;
     this.view.on("zoom", (lvl) => {
       this.view.zoomNum = lvl.detail.level;
+      this.canvas.find("rect").forEach((rect) => {
+        rect.attr({
+          "stroke-width": 3 / lvl.detail.level,
+        });
+      });
+      this.canvas.find("path").forEach((path) => {
+        path.attr({
+          "stroke-width": 3 / lvl.detail.level,
+        });
+      });
+      this.canvas.find("polyline").forEach((polyline) => {
+        polyline.attr({
+          "stroke-width": 3 / lvl.detail.level,
+        });
+      });
+      this.canvas.find("circle").forEach((circle) => {
+        circle.radius(6 / lvl.detail.level);
+      });
       this.$emit("update:zoom", lvl.detail.level);
     });
     this.canvas = this.view.group().attr({ id: "canvas" });

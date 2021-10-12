@@ -40,7 +40,7 @@ function createPolygonDraggableCircle() {
   points.pop();
   this.draggableCircles = points.map(([cx, cy], index) => {
     return this.circle()
-      .radius(6)
+      .radius(6/this.root().zoomNum)
       .attr({
         cx,
         cy,
@@ -72,7 +72,7 @@ function createRectDraggableCircle() {
   ];
   this.draggableCircles = points.map(({ cx, cy }, index) => {
     return this.circle()
-      .radius(6)
+      .radius(6/this.root().zoomNum)
       .attr({
         cx,
         cy,

@@ -15,6 +15,7 @@ export const createDrawLayer = function(mode) {
     .rect(width, height)
     .attr({ x, y, "fill-opacity": 0 })
     .on("mousemove", mouseMoveFollow);
+  // .on("contextmenu", drawCancel)
   if (mode === "rect") {
     drawLayer.on("mousemove", drawTempRect);
     drawLayer.on("click", drawRectHandler);
@@ -35,13 +36,14 @@ function mouseMoveFollow(e) {
   if (!board.followCircle) {
     board.followCircle = board
       .circle()
-      .radius(6)
+      .radius(6 / this.root().zoomNum)
       .attr({ cx, cy, fill: board.followColor })
       .on("mousemove", function(e) {
         const [x, y] = currentNodeMovePosition(e, this.root().zoomNum);
         this.attr({ cx: x, cy: y });
       })
       .on("mousemove", drawTempRect.bind(board));
+    // .on("contextmenu", drawCancel.bind(board))
   } else {
     board.followCircle.attr({ cx, cy });
   }
@@ -77,10 +79,11 @@ function drawTempPath(e) {
           stroke: this.followColor,
           fill: this.followColor,
           "fill-opacity": 0.6,
-          "stroke-width": 3,
+          "stroke-width": 3 / this.root().zoomNum,
           "stroke-dasharray": "10,10",
         })
         .on("mousemove", mouseMoveFollow);
+      // .on("contextmenu", drawCancel)
     } else {
       this.tempPath.plot(tempPathArray.join().replaceAll(",", " "));
     }
@@ -92,7 +95,7 @@ function drawPolyPathHandler(e) {
   if (this.pathPoints.length === 0) {
     this.pathPoints.push(
       this.circle()
-        .radius(6)
+        .radius(6 / this.root().zoomNum)
         .attr({ cx: x, cy: y, fill: this.followColor, id: "begin" })
     );
     this.polyPath = this.path()
@@ -100,12 +103,12 @@ function drawPolyPathHandler(e) {
       .attr({
         stroke: this.followColor,
         fill: "none",
-        "stroke-width": 3,
+        "stroke-width": 3 / this.root().zoomNum,
       });
   } else {
     this.pathPoints.push(
       this.circle()
-        .radius(6)
+        .radius(6 / this.root().zoomNum)
         .attr({ cx: x, cy: y, fill: this.followColor })
     );
     const pathArray = this.polyPath.array();
@@ -118,7 +121,7 @@ function drawRectHandler(e) {
   const [x, y] = currentNodeMovePosition(e, this.root().zoomNum);
   if (!this.begin) {
     this.begin = this.circle()
-      .radius(6)
+      .radius(6 / this.root().zoomNum)
       .attr({ cx: x, cy: y, fill: this.followColor, id: "begin" });
   } else {
     const { cx, cy } = this.begin.attr(["cx", "cy"]);
@@ -127,7 +130,7 @@ function drawRectHandler(e) {
         x: Math.min(x, cx),
         y: Math.min(y, cy),
         stroke: this.followColor,
-        "stroke-width": 3,
+        "stroke-width": 3 / this.root().zoomNum,
         "fill-opacity": 0,
         name: "untitled",
         type: "rectangle",
@@ -149,7 +152,7 @@ function drawTempRect(e) {
         y: Math.min(y, cy),
         stroke: this.followColor,
         "stroke-dasharray": "10,10",
-        "stroke-width": 3,
+        "stroke-width": 3 / this.root().zoomNum,
         fill: "none",
       });
     } else {
@@ -172,7 +175,7 @@ function polygonCountIsClose(e) {
     if (Math.sqrt(a * a + b * b) < 15) {
       if (!this.closePoint) {
         this.closePoint = this.circle()
-          .radius(15)
+          .radius(15 / this.root().zoomNum)
           .attr({
             cx,
             cy,
@@ -208,7 +211,7 @@ function pathToPolygon() {
     .toPoly()
     .attr({
       stroke: this.followColor,
-      "stroke-width": 3,
+      "stroke-width": 3 / this.root().zoomNum,
       fill: "black",
       "fill-opacity": 0,
       name: "untitled",
@@ -219,3 +222,8 @@ function pathToPolygon() {
     .addTo("#canvas");
   this.parent().drawDone(polygon);
 }
+
+// function drawCancel(e){
+// console.log(e)
+// this.parent().drawCancel()
+// }

@@ -27,4 +27,9 @@ export const enhanceCanvas = (canvas, that) => {
       el.remove();
     });
   };
+  canvas.drawCancel = function() {
+    this.findOne("#drawLayer").remove();
+    this.root().off("mousemove");
+    that.$emit("update:mode", "drag");
+  };
 };
