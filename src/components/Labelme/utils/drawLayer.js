@@ -222,8 +222,3 @@ function pathToPolygon() {
     .addTo("#canvas");
   this.parent().drawDone(polygon);
 }
-
-// function drawCancel(e){
-// console.log(e)
-// this.parent().drawCancel()
-// }

@@ -50,8 +50,10 @@ export default {
       this.canvas.find("#drawLayer").remove();
       if (this.mode !== "drag") {
         this.canvas.on("contextmenu", this.canvas.drawCancel);
+        this.canvas.on("mousedown", (e) => e.stopPropagation());
         this.canvas.createDrawLayer(this.mode);
       } else {
+        this.canvas.off("mousedown");
         this.canvas.off("contextmenu");
       }
     },
@@ -75,6 +77,7 @@ export default {
       .viewbox(0, 0, this.width, this.height)
       .panZoom(this.zoomConfig);
     this.view.zoomNum = 1;
+
     this.view.on("zoom", (lvl) => {
       this.view.zoomNum = lvl.detail.level;
       this.canvas.find("rect").forEach((rect) => {
@@ -101,6 +104,7 @@ export default {
     this.canvas.on("click", function () {
       this.clearSelect();
     });
+
     enhanceCanvas(this.canvas, this);
   },
   methods: {
