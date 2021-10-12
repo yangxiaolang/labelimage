@@ -77,7 +77,6 @@ export default {
     });
     this.canvas = this.view.group().attr({ id: "canvas" })
     this.canvas.on('click',function(){
-      console.log('canvas-click')
       this.clearSelect()
     })
     enhanceCanvas(this.canvas, this);

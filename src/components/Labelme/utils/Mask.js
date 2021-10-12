@@ -1,7 +1,6 @@
 import { randomColor } from "./utils";
 
 export const createMask = function(e) {
-  console.log("graph-click");
   this.parent().clearSelect();
   const type = this.attr("type");
   const canvas = this.parent();
@@ -29,8 +28,36 @@ export const createMask = function(e) {
     createRectDraggableCircle.call(mask);
     mask.on("dragend", rectMaskDragendHandler);
   }
+  if (type === "polygon") {
+    createPolygonDraggableCircle.call(mask);
+    mask.on("dragend", polygonMaskDragendHandler);
+  }
   e.stopPropagation();
 };
+
+function createPolygonDraggableCircle() {
+  const points = [...this.clone.array()];
+  points.pop();
+  this.draggableCircles = points.map(([cx, cy], index) => {
+    return this.circle()
+      .radius(6)
+      .attr({
+        cx,
+        cy,
+        fill: this.color,
+        index,
+      })
+      .draggable()
+      .on("click", function(e) {
+        e.stopPropagation();
+      })
+      .on("dragstart", function() {
+        this.parent().mounted.hide();
+      })
+      .on("dragmove", polygonMaskCircleDragmoveHandler)
+      .on("dragend", polygonMaskDragendHandler.bind(this));
+  });
+}
 
 function createRectDraggableCircle() {
   const { x, y, width, height } = this.clone.attr([
@@ -60,16 +87,7 @@ function createRectDraggableCircle() {
         this.parent().mounted.hide();
       })
       .on("dragmove", rectMaskCircleDragmoveHandler)
-      .on("dragend", function() {
-        const { width, height, x, y } = this.parent().clone.attr([
-          "width",
-          "height",
-          "x",
-          "y",
-        ]);
-        this.parent().mounted.attr({ width, height, x, y });
-        this.parent().mounted.show();
-      });
+      .on("dragend", rectMaskDragendHandler.bind(this));
   });
 }
 
@@ -80,8 +98,19 @@ function rectMaskDragendHandler() {
     "width",
     "height",
   ]);
-  this.mounted.attr({ x, y, width, height });
-  this.mounted.show();
+  this.mounted.attr({ x, y, width, height }).show();
+}
+
+function polygonMaskDragendHandler() {
+  console.log(this)
+  this.mounted
+    .plot(
+      this.clone
+        .array()
+        .join()
+        .replaceAll(",", " ")
+    )
+    .show();
 }
 
 function rectMaskCircleDragmoveHandler() {
@@ -95,4 +124,14 @@ function rectMaskCircleDragmoveHandler() {
     x: Math.min(cx, otherX),
     y: Math.min(cy, otherY),
   });
+}
+
+function polygonMaskCircleDragmoveHandler() {
+  const { cx, cy, index } = this.attr(["cx", "cy", "index"]);
+  const pointsArray = this.parent().clone.array();
+  pointsArray[index] = [cx, cy];
+  if (index === 0) {
+    pointsArray[pointsArray.length - 1] = [cx, cy];
+  }
+  this.parent().clone.plot(pointsArray.join().replaceAll(",", " "));
 }
