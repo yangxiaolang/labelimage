@@ -75,10 +75,10 @@ export default {
       this.view.zoomNum = lvl.detail.level;
       this.$emit("update:zoom", lvl.detail.level);
     });
-    this.canvas = this.view.group().attr({ id: "canvas" })
-    this.canvas.on('click',function(){
-      this.clearSelect()
-    })
+    this.canvas = this.view.group().attr({ id: "canvas" });
+    this.canvas.on("click", function () {
+      this.clearSelect();
+    });
     enhanceCanvas(this.canvas, this);
   },
   methods: {

@@ -22,9 +22,9 @@ export const enhanceCanvas = (canvas, that) => {
     that.$emit("update:mode", "drag");
     that.$emit("update:graphObjectList", that.graphObjectList.concat([graph]));
   };
-  canvas.clearSelect=function(){
-      this.find('#select').forEach(el => {
-          el.remove()
-      });
-  }
+  canvas.clearSelect = function() {
+    this.find("#select").forEach((el) => {
+      el.remove();
+    });
+  };
 };

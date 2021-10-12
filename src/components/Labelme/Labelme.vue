@@ -70,9 +70,9 @@
           <el-divider></el-divider>
           <div style="display:flex;justify-content:space-between;align-item:center">
             <h3 style="margin:0;padding:0 20px">标记管理</h3>
-            <el-button type="text"
+            <!-- <el-button type="text"
                        style="padding:0 10px"
-                       @click="$refs['board'].clearAll()">清空</el-button>
+                       @click="$refs['board'].clearAll()">清空</el-button> -->
           </div>
           <el-divider></el-divider>
           <el-table :data="tableData"
