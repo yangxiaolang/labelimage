@@ -1,8 +1,10 @@
 <template>
-  <div id="board"
-       oncontextmenu="return false;"
-       class="board"
-       style="background:rgb(244,244,244)">
+  <div style="postion:relative">
+    <div id="board"
+         oncontextmenu="return false;"
+         class="board"
+         style="background:rgb(244,244,244)">
+    </div>
   </div>
 </template>
 <script>
@@ -47,6 +49,7 @@ export default {
       this.canvas.css({
         cursor: this.mode !== "drag" ? "pointer" : "default",
       });
+
       this.canvas.find("#drawLayer").remove();
       if (this.mode !== "drag") {
         this.canvas.on("contextmenu", this.canvas.drawCancel);

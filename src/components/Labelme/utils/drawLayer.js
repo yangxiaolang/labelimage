@@ -172,7 +172,7 @@ function polygonCountIsClose(e) {
     const { cx, cy } = this.pathPoints[0].attr(["cx", "cy"]);
     const a = Math.abs(cx - x);
     const b = Math.abs(cy - y);
-    if (Math.sqrt(a * a + b * b) < 15) {
+    if (Math.sqrt(a * a + b * b) < 15 / this.root().zoomNum) {
       if (!this.closePoint) {
         this.closePoint = this.circle()
           .radius(15 / this.root().zoomNum)

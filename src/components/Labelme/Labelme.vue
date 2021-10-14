@@ -138,8 +138,8 @@ export default {
         bitScale: 1,
       },
       zoomConfig: {
-        zoomFactor: 1,
-        zoomMin: 0.05,
+        zoomFactor: 0.1,
+        zoomMin: 0.5,
         zoomMax: 20,
       },
     };
