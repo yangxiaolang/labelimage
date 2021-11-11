@@ -7,13 +7,14 @@ export const getCanvasRectClientXandY = () => {
 
 export const saveJSON = (data, filename) => {
   const blob = new Blob([data], { type: 'text/json' });
-  const e = document.createEvent('MouseEvents');
+  // const e = document.createEvent('MouseEvents');
   const a = document.createElement('a')
   a.download = `${filename}.json`
   a.href = window.URL.createObjectURL(blob)
   a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
-  e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
-  a.dispatchEvent(e)
+  a.click()
+  // e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+  // a.dispatchEvent(e)
 }
 
 export const currentNodeMovePosition = (e, zoom) => {

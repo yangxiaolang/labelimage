@@ -172,7 +172,8 @@ export default {
       const { file } = param;
       this.graphObjectList = [];
       this.imageInfo.imageUrl = URL.createObjectURL(file);
-      this.imageInfo.imageName = file.name;
+
+      this.imageInfo.imageName = file.name.split('.')[0];
       const fr = new FileReader();
       fr.readAsDataURL(file);
       fr.onload = () => {
