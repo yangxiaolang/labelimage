@@ -9,6 +9,7 @@
 </template>
 <script>
 import { loadImage, enhanceCanvas } from "../utils/init";
+import { rotateLocation } from "../utils/utils";
 export default {
   name: "Board",
   props: {
@@ -18,7 +19,7 @@ export default {
     bitScale: Number,
     zoomConfig: Object,
     ratio: Number,
-    imageUrl: String,
+    // imageUrl: String,
     imageHeight: Number,
     imageWidth: Number,
     width: {
@@ -60,18 +61,18 @@ export default {
         this.canvas.off("contextmenu");
       }
     },
-    imageUrl() {
-      this.$emit("update:mode", "drag");
-      this.view.zoom(1);
-      this.view.zoomNum = 1;
-      this.view.viewbox(0, 0, this.width, this.height);
-      this.canvas.children().forEach((child) => {
-        child.remove();
-      });
-      if (this.imageUrl !== "") {
-        this.initCanvas(this.imageUrl);
-      }
-    },
+    // imageUrl:async function() {
+    //   this.$emit("update:mode", "drag");
+    //   this.view.zoom(1);
+    //   this.view.zoomNum = 1;
+    //   this.view.viewbox(0, 0, this.width, this.height);
+    //   // this.canvas.children().forEach((child) => {
+    //   //   child.remove();
+    //   // });
+    //   if (this.imageUrl !== "") {
+    //     return await this.initCanvas(this.imageUrl);
+    //   }
+    // },
   },
   mounted() {
     this.view = this.$svg()
@@ -111,19 +112,70 @@ export default {
     enhanceCanvas(this.canvas, this);
   },
   methods: {
+    changeLabelImage: async function (url, mode) {
+      this.$emit("update:mode", "drag");
+      this.view.zoom(1);
+      this.view.zoomNum = 1;
+      this.view.viewbox(0, 0, this.width, this.height);
+      // this.canvas.children().forEach((child) => {
+      //   child.remove();
+      // });
+      if (url !== "") {
+        await this.initCanvas(url, mode);
+      }
+    },
     clearSelect() {
       this.canvas.clearSelect();
     },
-    initCanvas: async function (imageUrl) {
+    initCanvas: async function (imageUrl, mode) {
       const image = await loadImage(imageUrl);
       const { width, height } = image;
       const ratio = height / width;
       const expectWidth = this.width * 0.75;
+      const bitScale = width / expectWidth;
+      if (mode) {
+        this.rotateLable(width, bitScale);
+      }
       this.$emit("update:imageWidth", width);
       this.$emit("update:imageHeight", height);
       this.$emit("update:ratio", ratio);
-      this.$emit("update:bitScale", width / expectWidth);
+      this.$emit("update:bitScale", bitScale);
       this.canvas.loadImage(imageUrl).size(expectWidth, expectWidth * ratio);
+    },
+    rotateLable(imageWidth, bitScale) {
+      this.graphObjectList.forEach((graph) => {
+        console.log(graph);
+        if (graph.type === "rect") {
+          const { x, y, width, height } = graph.attr([
+            "x",
+            "y",
+            "width",
+            "height",
+          ]);
+          const { x: x1, y: y1 } = rotateLocation(
+            x * this.bitScale,
+            (y + height) * this.bitScale,
+            { x: 0, y: 0 }
+          );
+          graph.attr({
+            x: Math.round(imageWidth + x1) / bitScale,
+            y: Math.round(y1) / bitScale,
+            width: (height * this.bitScale) / bitScale,
+            height: (width * this.bitScale) / bitScale,
+          });
+        } else if (graph.type === "polyline") {
+          const tempPathArray = [...graph.array()].map((location) => {
+            const { x, y } = rotateLocation(
+              ...location.map((el) => el * this.bitScale),
+              { x: 0, y: 0 }
+            );
+            return [Math.round(imageWidth + x), Math.round(y)].map(
+              (el) => el / bitScale
+            );
+          });
+          graph.plot(tempPathArray.join().replaceAll(",", " "));
+        }
+      });
     },
   },
 };

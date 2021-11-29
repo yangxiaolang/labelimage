@@ -53,6 +53,13 @@
                      :class="drawBoardConfig.mode==='poly'?'active':''"
                      @click="drawBoardConfig.mode='poly'"><i class="iconfont icon-duobianxing"></i></el-button>
         </el-tooltip>
+        <el-tooltip class="item"
+                    effect="dark"
+                    content="旋转图片"
+                    placement="right">
+          <el-button type="text"
+                     @click="rotateImage"><i class="el-icon-refresh-right"></i></el-button>
+        </el-tooltip>
 
       </div>
       <div class="main">
@@ -103,6 +110,7 @@
               </template>
             </el-table-column>
           </el-table>
+
         </div>
       </div>
     </div>
@@ -171,9 +179,11 @@ export default {
     changeTagImage(param) {
       const { file } = param;
       this.graphObjectList = [];
-      this.imageInfo.imageUrl = URL.createObjectURL(file);
+      const imageUrl = URL.createObjectURL(file);
+      this.$refs["board"].changeLabelImage(imageUrl);
+      this.imageInfo.imageUrl = imageUrl;
 
-      this.imageInfo.imageName = file.name.split('.')[0];
+      this.imageInfo.imageName = file.name.split(".")[0];
       const fr = new FileReader();
       fr.readAsDataURL(file);
       fr.onload = () => {
@@ -208,6 +218,45 @@ export default {
         }
       });
     },
+    rotateImage() {
+      const originImageURL = this.imageInfo.imageUrl;
+      const image = new Image();
+      image.src = originImageURL;
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.height;
+        canvas.height = image.width;
+        const ctx = canvas.getContext("2d");
+        ctx.rotate(0.5 * Math.PI);
+        ctx.translate(0, -canvas.width);
+        ctx.drawImage(image, 0, 0);
+        const dataUrl = canvas.toDataURL();
+        this.imageInfo.imageData = dataUrl.split("base64,")[1];
+        this.imageInfo.imageUrl = dataUrl;
+        this.$refs["board"].changeLabelImage(dataUrl, true);
+      };
+    },
+    // rotateLable() {
+    //   this.graphObjectList.forEach((graph) => {
+    //     if (graph.type === "rect") {
+    //       const { x, y, width, height } = graph.attr([
+    //         "x",
+    //         "y",
+    //         "width",
+    //         "height",
+    //       ]);
+    //       console.log([x,y].map(el=>Math.round(el*this.drawBoardConfig.bitScale)))
+    //       const {x:x1,y:y1} = rotateLocation(x*this.drawBoardConfig.bitScale,(y+height)*this.drawBoardConfig.bitScale,{x:0,y:0})
+    //       console.log(Math.round(411-x1),Math.round(y1))
+    //       graph.attr({
+    //         x: y1,
+    //         y: x1,
+    //         width: height,
+    //         height: width,
+    //       });
+    //     }
+    //   });
+    // },
     exportJSON() {
       if (this.imageInfo.imageUrl !== "") {
         const shapes = this.tableData.map((row) => {

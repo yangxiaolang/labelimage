@@ -53,6 +53,7 @@ function mouseMoveFollow(e) {
 }
 
 function removeFollower(e) {
+  e
   const board = this.parent();
   const [cx, cy] = currentNodeMovePosition(e, this.root().zoomNum);
   const { width, height } = board.attr(["width", "height"]);

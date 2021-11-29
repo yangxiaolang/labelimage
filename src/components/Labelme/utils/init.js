@@ -12,9 +12,20 @@ export const loadImage = (url) => {
 
 export const enhanceCanvas = (canvas, that) => {
   canvas.loadImage = function(imageUrl) {
-    this.labelImage = this.image(imageUrl).attr({ id: "background" });
-    return this.labelImage;
+    const image =this.findOne('#background') 
+    if(image){
+      image.load(imageUrl)
+      return image
+    }else{
+      this.labelImage = this.image(imageUrl).attr({ id: "background" });
+      return this.labelImage;
+    }
   };
+  canvas.clear= function(){
+      this.children().forEach((child) => {
+        child.remove();
+      });
+  },
   canvas.createDrawLayer = createDrawLayer;
   canvas.drawDone = function(graph) {
     this.findOne("#drawLayer").remove();
