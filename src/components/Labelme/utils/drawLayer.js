@@ -16,15 +16,24 @@ export const createDrawLayer = function(mode) {
     .attr({ x, y, "fill-opacity": 0 })
     .on("mousemove", mouseMoveFollow);
   // .on("contextmenu", drawCancel)
-  if (mode === "rect") {
-    drawLayer.on("mousemove", drawTempRect);
-    drawLayer.on("click", drawRectHandler);
-  }
-  if (mode === "poly") {
-    drawLayer.pathPoints = [];
-    drawLayer.on("mousemove", drawTempPath);
-    drawLayer.on("mousemove", polygonCountIsClose);
-    drawLayer.on("click", drawPolyPathHandler);
+  switch(mode){
+    case 'rect':{
+      drawLayer.on("mousemove", drawTempRect);
+      drawLayer.on("click", drawRectHandler);
+      break
+    }
+    case 'poly':{
+      drawLayer.pathPoints = [];
+      drawLayer.on("mousemove", drawTempPath);
+      drawLayer.on("mousemove", polygonCountIsClose);
+      drawLayer.on("click", drawPolyPathHandler);
+      break
+    }
+    case 'line':{
+      drawLayer.on("mousemove", drawTempLine);
+      drawLayer.on("click", drawLineHandler);
+      break
+    }
   }
   return drawLayer;
 };
@@ -42,8 +51,6 @@ function mouseMoveFollow(e) {
         const [x, y] = currentNodeMovePosition(e, this.root().zoomNum);
         this.attr({ cx: x, cy: y });
       })
-      .on("mousemove", drawTempRect.bind(board));
-    // .on("contextmenu", drawCancel.bind(board))
   } else {
     board.followCircle.attr({ cx, cy });
   }
@@ -143,6 +150,29 @@ function drawRectHandler(e) {
   }
 }
 
+function drawLineHandler(e) {
+  const [x, y] = currentNodeMovePosition(e, this.root().zoomNum);
+  if (!this.begin) {
+    this.begin = this.circle()
+      .radius(6 / this.root().zoomNum)
+      .attr({ cx: x, cy: y, fill: this.followColor, id: "begin" });
+  } else {
+    const { cx, cy } = this.begin.attr(["cx", "cy"]);
+    const line = this.line(cx, cy,x,y)
+      .attr({
+        stroke: this.followColor,
+        "stroke-width": 3 / this.root().zoomNum,
+        "fill-opacity": 0,
+        name: "untitled",
+        type: "line",
+        color: this.followColor,
+      })
+      .on("click", createMask)
+      .addTo("#canvas");
+    this.parent().drawDone(line);
+  }
+}
+
 function drawTempRect(e) {
   if (this.begin) {
     const [x, y] = currentNodeMovePosition(e, this.root().zoomNum);
@@ -163,6 +193,23 @@ function drawTempRect(e) {
         x: Math.min(x, cx),
         y: Math.min(y, cy),
       });
+    }
+  }
+}
+
+function drawTempLine(e) {
+  if (this.begin) {
+    const [x, y] = currentNodeMovePosition(e, this.root().zoomNum);
+    const { cx, cy } = this.begin.attr(["cx", "cy"]);
+    if (!this.tempLine) {
+      this.tempLine = this.line(cx, cy,x,y).attr({
+        stroke: this.followColor,
+        "stroke-dasharray": "10,10",
+        "stroke-width": 3 / this.root().zoomNum,
+        fill: "none",
+      });
+    } else {
+      this.tempLine.plot([[cx,cy],[x,y]])
     }
   }
 }

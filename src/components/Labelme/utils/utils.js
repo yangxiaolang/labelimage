@@ -64,9 +64,9 @@ const getUint8Arr = (dataurl) => {
  export const rotateLocation = (x, y, basePoint) => {
    // 因为坐标系是向右向下为正，顺时针90度-Π/2 其实是计算逆时针的Π/2
    return {
-    x:  basePoint.y + basePoint.x-y,
-    y: basePoint.y + (x - basePoint.x),
-  };
+      x:  basePoint.y + basePoint.x-y,
+      y: basePoint.y + (x - basePoint.x),
+    };
   //js的90度余弦值有精度问题不是0，反正是顺时针90度，直接将正余弦值写死
   //   return {
   //     x:

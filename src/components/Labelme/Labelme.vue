@@ -1,5 +1,6 @@
 <template>
-  <div class="labelme">
+  <div class="labelme"
+       id="labelme">
     <div style="display:flex;border:gray 1px solid">
       <div class="tools"
            @click="$refs['board'].clearSelect()">
@@ -47,6 +48,14 @@
         </el-tooltip>
         <el-tooltip class="item"
                     effect="dark"
+                    content="直线工具"
+                    placement="right">
+          <el-button type="text"
+                     :class="drawBoardConfig.mode==='line'?'active':''"
+                     @click="drawBoardConfig.mode='line'"><i class="el-icon-minus"></i></el-button>
+        </el-tooltip>
+        <el-tooltip class="item"
+                    effect="dark"
                     content="多边形工具"
                     placement="right">
           <el-button type="text"
@@ -60,12 +69,32 @@
           <el-button type="text"
                      @click="rotateImage"><i class="el-icon-refresh-right"></i></el-button>
         </el-tooltip>
+        <el-tooltip class="item"
+                    effect="dark"
+                    content="重绘"
+                    placement="right">
+          <el-button type="text"
+                     @click="reLabel">
+            <i class="el-icon-edit-outline"></i>
+          </el-button>
+        </el-tooltip>
+        <el-tooltip class="item"
+                    effect="dark"
+                    content="全屏"
+                    placement="right">
+          <el-button type="text"
+                     @click="fullScreen">
+            <i class="el-icon-full-screen"></i>
+          </el-button>
+        </el-tooltip>
 
       </div>
       <div class="main">
         <draw-board ref="board"
                     v-bind.sync="drawBoardConfig"
                     :zoom-config="zoomConfig"
+                    :width="width"
+                    :height="height"
                     :graph-object-list.sync="graphObjectList"
                     :image-width.sync="imageInfo.imageWidth"
                     :image-height.sync="imageInfo.imageHeight"
@@ -131,6 +160,8 @@ export default {
   components: { DrawBoard },
   data() {
     return {
+      width: 800,
+      height: 600,
       imageInfo: {
         imageUrl: "",
         imageName: "",
@@ -138,6 +169,7 @@ export default {
         imageHeight: 0,
         imageWidth: 0,
       },
+
       graphObjectList: [],
       drawBoardConfig: {
         mode: "drag",
@@ -170,7 +202,42 @@ export default {
       });
     },
   },
+  mounted() {
+    const editor = document.getElementById("labelme");
+    this.width = editor.offsetWidth - 420;
+    this.height = editor.offsetHeight;
+    this.$nextTick(() => {
+      this.$refs["board"].resize();
+    });
+    document.addEventListener("fullscreenchange", () => {
+      console.log(document.fullscreenElement)
+      if (!document.fullscreenElement) {
+
+        this.$nextTick(() => {
+          this.$refs["board"].resize();
+        });
+      }
+    });
+  },
   methods: {
+    fullScreen() {
+      const editor = document.getElementById("labelme");
+      // console.log(document.fullscreenElement);
+      if (!document.fullscreenElement) {
+        this.width = screen.width - 420;
+        this.height = screen.height;
+        editor.requestFullscreen();
+        this.$nextTick(() => {
+          this.$refs["board"].resize();
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    },
+    reLabel() {
+      this.graphObjectList.forEach((el) => el.remove());
+      this.graphObjectList = [];
+    },
     handleGraphNameChange(row, e) {
       row.mountedDOM.attr({
         name: e,
@@ -308,7 +375,9 @@ export default {
 .labelme {
   display: flex;
   justify-content: center;
-  width: auto;
+  width: 100%;
+  height: 100%;
+  background: white;
 }
 
 .labelme >>> .el-divider {

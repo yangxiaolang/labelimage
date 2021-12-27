@@ -32,8 +32,36 @@ export const createMask = function(e) {
     createPolygonDraggableCircle.call(mask);
     mask.on("dragend", polygonMaskDragendHandler);
   }
+  if(type ==='line'){
+    createLinedraggableCircle.call(mask)
+    mask.on("dragend", polygonMaskDragendHandler);
+  }
   e.stopPropagation();
 };
+
+function createLinedraggableCircle(){
+  const points = [...this.clone.array()];
+  console.log(points)
+  this.draggableCircles = points.map(([cx, cy], index) => {
+    return this.circle()
+      .radius(6/this.root().zoomNum)
+      .attr({
+        cx,
+        cy,
+        fill: this.color,
+        index,
+      })
+      .draggable()
+      .on("click", function(e) {
+        e.stopPropagation();
+      })
+      .on("dragstart", function() {
+        this.parent().mounted.hide();
+      })
+      .on("dragmove", lineMaskCircleDragmoveHandler)
+      .on("dragend", polygonMaskDragendHandler.bind(this));
+  });
+}
 
 function createPolygonDraggableCircle() {
   const points = [...this.clone.array()];
@@ -102,7 +130,6 @@ function rectMaskDragendHandler() {
 }
 
 function polygonMaskDragendHandler() {
-  console.log(this)
   this.mounted
     .plot(
       this.clone
@@ -134,4 +161,11 @@ function polygonMaskCircleDragmoveHandler() {
     pointsArray[pointsArray.length - 1] = [cx, cy];
   }
   this.parent().clone.plot(pointsArray.join().replaceAll(",", " "));
+}
+
+function lineMaskCircleDragmoveHandler() {
+  const { cx, cy, index } = this.attr(["cx", "cy", "index"]);
+  const pointsArray = [...this.parent().clone.array()];
+  pointsArray[index] = [cx, cy];
+  this.parent().clone.plot(pointsArray);
 }

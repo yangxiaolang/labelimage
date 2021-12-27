@@ -61,18 +61,6 @@ export default {
         this.canvas.off("contextmenu");
       }
     },
-    // imageUrl:async function() {
-    //   this.$emit("update:mode", "drag");
-    //   this.view.zoom(1);
-    //   this.view.zoomNum = 1;
-    //   this.view.viewbox(0, 0, this.width, this.height);
-    //   // this.canvas.children().forEach((child) => {
-    //   //   child.remove();
-    //   // });
-    //   if (this.imageUrl !== "") {
-    //     return await this.initCanvas(this.imageUrl);
-    //   }
-    // },
   },
   mounted() {
     this.view = this.$svg()
@@ -112,6 +100,13 @@ export default {
     enhanceCanvas(this.canvas, this);
   },
   methods: {
+    resize() {
+      this.view.zoom(1);
+      this.view.zoomNum = 1;
+      this.view
+        .size(this.width, this.height)
+        .viewbox(0, 0, this.width, this.height);
+    },
     changeLabelImage: async function (url, mode) {
       this.$emit("update:mode", "drag");
       this.view.zoom(1);
@@ -184,6 +179,8 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .board {
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   background-color: rgb(244, 244, 244);
