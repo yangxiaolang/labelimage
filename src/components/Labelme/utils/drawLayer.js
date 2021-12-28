@@ -34,6 +34,11 @@ export const createDrawLayer = function(mode) {
       drawLayer.on("click", drawLineHandler);
       break
     }
+    case 'ellipse':{
+      drawLayer.on("mousemove", drawTempEllipse);
+      drawLayer.on("click", drawEllipseHandler);
+      break
+    }
   }
   return drawLayer;
 };
@@ -193,6 +198,56 @@ function drawTempRect(e) {
         x: Math.min(x, cx),
         y: Math.min(y, cy),
       });
+    }
+  }
+}
+
+function drawEllipseHandler(e){
+  const [x, y] = currentNodeMovePosition(e, this.root().zoomNum);
+  if (!this.begin) {
+    this.begin = this.circle()
+      .radius(6 / this.root().zoomNum)
+      .attr({ cx: x, cy: y, fill: this.followColor, id: "begin" });
+  } else {
+    const { cx, cy } = this.begin.attr(["cx", "cy"]);
+    const ellipse = this.ellipse(Math.abs(x - cx), Math.abs(y - cy))
+      .attr({
+        cx:(x+cx)/2,
+        cy:(y+cy)/2,
+        stroke: this.followColor,
+        "stroke-width": 3 / this.root().zoomNum,
+        "fill-opacity": 0,
+        name: "untitled",
+        type: "ellipse",
+        color: this.followColor,
+      })
+      .on("click", createMask)
+      .addTo("#canvas");
+    this.parent().drawDone(ellipse);
+  }
+}
+
+
+function drawTempEllipse(e){
+  drawTempRect.call(this,e)
+  if (this.begin) {
+    const [x, y] = currentNodeMovePosition(e, this.root().zoomNum);
+    const { cx, cy } = this.begin.attr(["cx", "cy"]);
+    if(!this.tempEllipse){
+      this.tempEllipse = this.ellipse(Math.abs(x - cx), Math.abs(y - cy)).attr({
+        cx: (x+ cx)/2,
+        cy: (y+ cy)/2,
+        stroke: this.followColor,
+        "stroke-width": 3 / this.root().zoomNum,
+        fill: "none",
+      });
+    }else{
+      this.tempEllipse.attr({
+        rx:Math.abs(x - cx)/2,
+        ry:Math.abs(y - cy)/2,
+        cx:(x+ cx)/2,
+        cy:(y+ cy)/2,
+      })
     }
   }
 }

@@ -32,19 +32,58 @@ export const createMask = function(e) {
     createPolygonDraggableCircle.call(mask);
     mask.on("dragend", polygonMaskDragendHandler);
   }
-  if(type ==='line'){
-    createLinedraggableCircle.call(mask)
+  if (type === "line") {
+    createLinedraggableCircle.call(mask);
     mask.on("dragend", polygonMaskDragendHandler);
+  }
+  if (type === "ellipse") {
+    createEllipsedraggableCircle.call(mask);
+    mask.on("dragend", ellipseMaskDragendHandler);
   }
   e.stopPropagation();
 };
 
-function createLinedraggableCircle(){
+function createEllipsedraggableCircle() {
+  const { cx, cy, rx, ry } = this.clone.attr(["cx", "cy", "rx", "ry"]);
+  const points = [
+    { cx: cx - rx, cy: cy - ry },
+    { cx: cx + rx, cy: cy + ry },
+  ];
+  this.tempRect = this.rect(2 * rx, 2 * ry).attr({
+    x: cx - rx,
+    y: cy - ry,
+    stroke: this.color,
+    "stroke-dasharray": "10,10",
+    "stroke-width": 3 / this.root().zoomNum,
+    fill: "none",
+  });
+  this.draggableCircles = points.map(({ cx, cy }, index) => {
+    return this.circle()
+      .radius(6 / this.root().zoomNum)
+      .attr({
+        cx,
+        cy,
+        fill: this.color,
+        index,
+      })
+      .draggable()
+      .on("click", function(e) {
+        e.stopPropagation();
+      })
+      .on("dragstart", function() {
+        this.parent().mounted.hide();
+      })
+      .on("dragmove", ellipseCircleDragmoveHandler)
+      .on("dragend", ellipseMaskDragendHandler.bind(this));
+  });
+}
+
+function createLinedraggableCircle() {
   const points = [...this.clone.array()];
-  console.log(points)
+  console.log(points);
   this.draggableCircles = points.map(([cx, cy], index) => {
     return this.circle()
-      .radius(6/this.root().zoomNum)
+      .radius(6 / this.root().zoomNum)
       .attr({
         cx,
         cy,
@@ -68,7 +107,7 @@ function createPolygonDraggableCircle() {
   points.pop();
   this.draggableCircles = points.map(([cx, cy], index) => {
     return this.circle()
-      .radius(6/this.root().zoomNum)
+      .radius(6 / this.root().zoomNum)
       .attr({
         cx,
         cy,
@@ -100,7 +139,7 @@ function createRectDraggableCircle() {
   ];
   this.draggableCircles = points.map(({ cx, cy }, index) => {
     return this.circle()
-      .radius(6/this.root().zoomNum)
+      .radius(6 / this.root().zoomNum)
       .attr({
         cx,
         cy,
@@ -128,7 +167,10 @@ function rectMaskDragendHandler() {
   ]);
   this.mounted.attr({ x, y, width, height }).show();
 }
-
+function ellipseMaskDragendHandler() {
+  const { cx, cy, rx, ry } = this.clone.attr(["cx", "cy", "rx", "ry"]);
+  this.mounted.attr({ cx, cy, rx, ry }).show();
+}
 function polygonMaskDragendHandler() {
   this.mounted
     .plot(
@@ -168,4 +210,23 @@ function lineMaskCircleDragmoveHandler() {
   const pointsArray = [...this.parent().clone.array()];
   pointsArray[index] = [cx, cy];
   this.parent().clone.plot(pointsArray);
+}
+
+function ellipseCircleDragmoveHandler() {
+  const { cx, cy, index } = this.attr(["cx", "cy", "index"]);
+  const otherIndex = Number(!index);
+  const otherX = this.parent().draggableCircles[otherIndex].attr("cx");
+  const otherY = this.parent().draggableCircles[otherIndex].attr("cy");
+  this.parent().tempRect.attr({
+    width: Math.abs(cx - otherX),
+    height: Math.abs(cy - otherY),
+    x: Math.min(cx, otherX),
+    y: Math.min(cy, otherY),
+  });
+  this.parent().clone.attr({
+    cx: (cx + otherX) / 2,
+    cy: (cy + otherY) / 2,
+    rx: Math.abs(cx - otherX)/2,
+    ry: Math.abs(cy - otherY)/2,
+  });
 }

@@ -56,6 +56,14 @@
         </el-tooltip>
         <el-tooltip class="item"
                     effect="dark"
+                    content="圆形工具"
+                    placement="right">
+          <el-button type="text"
+                     :class="drawBoardConfig.mode==='ellipse'?'active':''"
+                     @click="drawBoardConfig.mode='ellipse'"><i class="el-icon-search"></i></el-button>
+        </el-tooltip>
+        <el-tooltip class="item"
+                    effect="dark"
                     content="多边形工具"
                     placement="right">
           <el-button type="text"
@@ -151,6 +159,8 @@ const ModeMap = new Map([
   ["drag", "拖拽"],
   ["rect", "矩形"],
   ["poly", "多边形"],
+  ["line", "直线"],
+  ["ellipse", "圆形"],
 ]);
 import { saveJSON } from "./utils/utils";
 import DrawBoard from "./components/DrawBoard.vue";
