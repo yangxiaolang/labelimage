@@ -149,7 +149,6 @@ export default {
     },
     rotateLable(imageWidth, bitScale) {
       this.graphObjectList.forEach((graph) => {
-        console.log(graph);
         if (graph.type === "rect") {
           const { x, y, width, height } = graph.attr([
             "x",
