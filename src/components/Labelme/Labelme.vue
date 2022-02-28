@@ -86,7 +86,7 @@
             <i class="el-icon-edit-outline"></i>
           </el-button>
         </el-tooltip>
-        <el-tooltip class="item"
+        <!-- <el-tooltip class="item"
                     effect="dark"
                     content="全屏"
                     placement="right">
@@ -94,7 +94,7 @@
                      @click="fullScreen">
             <i class="el-icon-full-screen"></i>
           </el-button>
-        </el-tooltip>
+        </el-tooltip> -->
 
       </div>
       <div class="main">
@@ -114,9 +114,6 @@
           <el-divider></el-divider>
           <div style="display:flex;justify-content:space-between;align-item:center">
             <h3 style="margin:0;padding:0 20px">标记管理</h3>
-            <!-- <el-button type="text"
-                       style="padding:0 10px"
-                       @click="$refs['board'].clearAll()">清空</el-button> -->
           </div>
           <el-divider></el-divider>
           <el-table :data="tableData"

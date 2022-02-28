@@ -98,16 +98,6 @@ export default {
     });
 
     enhanceCanvas(this.canvas, this);
-    this.canvas.ellipse(200, 100).attr({
-      cx:100,
-      cy:50,
-      fill:'none',
-      stroke:'black'
-    })
-    this.canvas.rect(200, 100).attr({
-      fill:'none',
-      stroke:'black'
-    })
   },
   methods: {
     resize() {
