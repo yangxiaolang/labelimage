@@ -1,19 +1,19 @@
 <template>
   <div id="app">
-    <labelme></labelme>
+    <labelme style="width: 1200px; height: 600px; margin: 0 auto"></labelme>
   </div>
 </template>
 
 <script>
 // import HelloWorld from './components/HelloWorld.vue'
-import Labelme from './components/Labelme/Labelme.vue'
+import Labelme from "./components/Labelme/Labelme.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    Labelme
-  }
-}
+    Labelme,
+  },
+};
 </script>
 
 <style>
@@ -23,7 +23,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  /* margin-top: 60px; */
   background: white;
 }
 </style>
